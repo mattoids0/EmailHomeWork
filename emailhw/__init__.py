@@ -15,3 +15,4 @@ from emailhw.iochannels import file_output_channel
 from emailhw.iochannels import imap_input_channel,smtp_output_channel
 from emailhw.messages   import print_message
 
+from emailhw.commands   import compile_command
