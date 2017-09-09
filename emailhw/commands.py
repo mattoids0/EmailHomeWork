@@ -9,12 +9,25 @@ validate messages.
 
 Templates should follow some restriction, enforced by the command
 compiler.
-
 """
 
 import re
 import sys
 
+class CompilationFailed(ValueError):
+    """Exception raised when a command compilation fails"""
+    
+    def __init__(self,text,error_list=None):
+        
+        self.text   = text
+        self.errors = error_list
+
+    def __str__(self):
+        return self.text
+
+    def get_errors(self):
+        return self.errors
+        
 
 class Command:
 
@@ -66,7 +79,7 @@ class Command:
         else:
             return values
             
-    def last_errors(self):
+    def get_errors(self):
         return list(self.last_errors)
     
     def __str__(self):

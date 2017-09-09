@@ -7,7 +7,9 @@ command is transformed into a parsing function which verify and
 validate the message.
 """
 
-from emailhw import compile_command
+from emailhw import *
+
+
 
 registration = compile_command(
     """
@@ -38,17 +40,15 @@ del mio
 
 homework:   AB1001
 
-spero che sia magnanimo nella correzione.
+spero che alla consegna sia magnanimo nella correzione.
 
 -- 
 Mario Rossi
 """
 
-print(registration)
-print(registration.detect(example1))
-print(registration.parse(example1))
-print(submission)
-print(submission.detect(example1))
-print(submission.parse(example1))
-print(report)
-print(registration.detect(example1))
+with file_output_channel() as fout:
+
+    fout.send("Prova","pippo@topolinia.net","topolino@topolinia.net",
+              example1)
+
+    

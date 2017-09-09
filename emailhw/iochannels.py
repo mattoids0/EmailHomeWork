@@ -10,6 +10,7 @@ import mailbox
 import socket
 
 from contextlib import AbstractContextManager
+from collections import deque
 
 from emailhw.errors   import print_error
 from emailhw.messages import parse_rfc822,compose_email
@@ -136,7 +137,7 @@ class file_output_channel(AbstractContextManager,OutputChannel):
         pass
 
     def send(self,Subject,From,To,body):
-        print("Subject : %s\nFrom : %s\nTo : %s\n" % (Subject,From,To),file=self.fout)
+        print("Subject : %s\nFrom : %s\nTo : %s" % (Subject,From,To),file=self.fout)
         print(body,file=self.fout)
 
 #
@@ -181,3 +182,32 @@ class mailbox_input_channel(AbstractContextManager,OutputChannel):
     def __iter__(self):
         for k,msg in self.mailbox.iteritems():
             yield parse_rfc822(msg)
+
+
+#
+# Pipe IO channel
+#
+class pipe_io_channel(AbstractContextManager,OutputChannel,InputChannel):
+
+    def __init__(self):
+
+        self.msg_buffer =  deque()
+
+    def __enter__(self):
+        return self
+    
+    def __exit__(self,*exc_details):
+        return self
+
+    def send(self,Subject,From,To,body):
+        msg = compose_email(Subject=Subject,From=From,To=To,body=body)
+        self.msg_buffer.append(msg)
+
+    def __iter__(self):
+
+        try:
+            yield msg_buffer.popleft()
+        except IndexError:
+            raise StopIteration
+        
+        

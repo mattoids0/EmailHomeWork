@@ -1,7 +1,7 @@
 PROJECT=emailhw
 PYTHON_BIN=/usr/local/bin/python3
 VIRTUALENV = ~/.virtualenvs/$(PROJECT)-venv
-
+TESTCMD=nose2
 
 all : test
 
@@ -9,10 +9,10 @@ all : test
 
 test: venv
 	. $(VIRTUALENV)/bin/activate && \
-	python setup.py nosetests --with-doctest
+	$(TESTCMD)
 
 install:
-	python setup.py --user install
+	$(PYTHON_BIN) setup.py --user install
 
 clean:
 	rm -fr build
@@ -21,9 +21,10 @@ clean:
 	rm -fr docs/_build
 	find . -name '*.pyc' -delete
 	find . -name 'flycheck*.py' -delete
+	find . -name '__pycache__' -delete
 
 package: clean
-	python setup.py sdist bdist_wheel
+	$(PYTHON_BIN) setup.py sdist bdist_wheel
 
 upload: package
 	twine upload dist/*
@@ -47,7 +48,7 @@ docbuild: devinstall
 #
 editor-tools : venv
 	. $(VIRTUALENV)/bin/activate && \
-	pip install pylint nose
+	pip install pylint nose nose2
 
 doc-tools : venv
 	. $(VIRTUALENV)/bin/activate && \

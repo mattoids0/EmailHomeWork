@@ -19,3 +19,5 @@ errors['imap folder'] = "[IMAP] Unable to open folder. ({})"
 errors['imap fetch']  = "[IMAP] During message fetch. {}" 
 errors['smtp login']  = "[SMTP] Login failed. Check your credentials." 
 errors['smtp send']   = "[SMTP] Impossible to send email {}" 
+
+
