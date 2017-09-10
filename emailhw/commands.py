@@ -13,20 +13,25 @@ compiler.
 
 import re
 import sys
+from io import StringIO
 
 class CompilationFailed(ValueError):
     """Exception raised when a command compilation fails"""
     
-    def __init__(self,text,error_list=None):
+    def __init__(self,text,error_list=[]):
         
         self.text   = text
-        self.errors = error_list
-
+        self.error_list = error_list
+        
     def __str__(self):
-        return self.text
+        out = StringIO()
+        out.write("%s\n" % self.text)
+        for l,e  in self.errors_list:
+            out.write("Line %s: %s\n" % (l or "END",e))
+        return out.getvalue()
 
     def get_errors(self):
-        return self.errors
+        return self.error_list[:]
         
 
 class Command:
@@ -69,8 +74,9 @@ class Command:
                 self.last_errors.append("Value for field <%s> missing" % field)
             elif len(matches)>1:
                 self.last_errors.append("Multiple occurrence of field <%s>" % field)
+            elif matches[0][0] != field:
+                raise RuntimeError("Broken regexp. Tjis should not happen")
             else:
-                assert matches[0][0] == field
                 values[field] = matches[0][1].strip()
 
         if len(self.last_errors)>0:
@@ -117,6 +123,7 @@ def compile_command(text):
                 continue
             elif has_spaces.search(word):
                 errors_lines.append((i,"No spaces allowed inside a command."))
+                name = word
             elif name is not None:
                 errors_lines.append((i,"Only one command is allowed."))
             else:
@@ -130,11 +137,7 @@ def compile_command(text):
         errors_lines.append((None,"Repeated keywords in the template."))
 
     if len(errors_lines)>0:
-        print("**Error parsing template**\n%s\n--------------------------" % text,file=sys.stderr)
-        for l,e  in errors_lines:
-            print("Line %s: %s" % (l or "END",e),file=sys.stderr)
-        print('**************************',file=sys.stderr)
-        sys.exit(1)
-        
+        raise CompilationFailed("Error compiling the template",errors_lines)
+
     return Command(name,fields)
     
