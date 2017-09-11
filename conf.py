@@ -8,6 +8,7 @@ import emailhw
 
 from contextlib import contextmanager
 
+
 def get_imap_password():
     return keyring.get_password(Config['imap server'],
                                 Config['imap user'])
@@ -67,3 +68,20 @@ def mail_output_channel():
                                      Config['smtp password'] if isinstance(Config['smtp password'],str) else Config['smtp password']()) as smtp:
         yield smtp
     
+
+# Default commands
+registration_cmd = emailhw.compile_command("""
+iscrizione
+nome      : <NOME> 
+cognome   : <COGNOME>
+matricola : <NUMERO DI MATRICOLA>
+""")
+
+submission_cmd = emailhw.compile_command("""
+consegna
+homework : <CODICE>
+""")
+
+status_cmd = emailhw.compile_command("""
+situazione
+""")

@@ -32,7 +32,7 @@ class OutputChannel():
     def __init__(self):
         raise RuntimeError("This is an abstract class. No implementation.")
 
-    def send(self,Subject,From,To,body):
+    def send(self,Subject,From,To,body,inReplyTo=None):
         raise RuntimeError("This is an abstract class. No implementation.")
 
 #    
@@ -112,8 +112,12 @@ class smtp_output_channel(AbstractContextManager,OutputChannel):
     def __exit__(self,*exc_details):
         self.smtpserver.quit()
 
-    def send(self,Subject,From,To,body):
-        msg = compose_email(Subject=Subject,From=From,To=To,body=body)
+    def send(self,Subject,From,To,body,inReplyTo=None):
+        msg = compose_email(Subject=Subject,
+                            From=From,
+                            To=To,
+                            body=body,
+                            inReplyTo=inReplyTo)
         try:
             self.smtpserver.send_message(msg)
         except socket.gaierror as e:
@@ -156,8 +160,12 @@ class mailbox_output_channel(AbstractContextManager,OutputChannel):
         self.mailbox.unlock()
         return self
 
-    def send(self,Subject,From,To,body):
-        msg = compose_email(Subject=Subject,From=From,To=To,body=body)
+    def send(self,Subject,From,To,body,inReplyTo=None):
+        msg = compose_email(Subject=Subject,
+                            From=From,
+                            To=To,
+                            body=body,
+                            inReplyTo=inReplyTo)
         self.mailbox.add(msg)
 
 
@@ -199,8 +207,13 @@ class pipe_io_channel(AbstractContextManager,OutputChannel,InputChannel):
     def __exit__(self,*exc_details):
         return self
 
-    def send(self,Subject,From,To,body):
-        msg = compose_email(Subject=Subject,From=From,To=To,body=body)
+    def send(self,Subject,From,To,body,inReplyTo=None):
+        msg = compose_email(Subject=Subject,
+                            From=From,
+                            To=To,
+                            body=body,
+                            inReplyTo=inReplyTo)
+        
         self.msg_buffer.append(msg)
 
     def __iter__(self):

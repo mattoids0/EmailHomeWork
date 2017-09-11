@@ -75,7 +75,7 @@ class Command:
             elif len(matches)>1:
                 self.last_errors.append("Multiple occurrence of field <%s>" % field)
             elif matches[0][0] != field:
-                raise RuntimeError("Broken regexp. Tjis should not happen")
+                raise RuntimeError("Broken regexp. This should not happen")
             else:
                 values[field] = matches[0][1].strip()
 
