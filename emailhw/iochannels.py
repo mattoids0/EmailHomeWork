@@ -65,6 +65,7 @@ class imap_input_channel(AbstractContextManager,InputChannel):
     def __exit__(self,*exc_details):
         self.imapserver.close()
         self.imapserver.logout()
+        return False
 
     def __iter__(self):
         
@@ -111,6 +112,7 @@ class smtp_output_channel(AbstractContextManager,OutputChannel):
     
     def __exit__(self,*exc_details):
         self.smtpserver.quit()
+        return False
 
     def send(self,Subject,From,To,body,inReplyTo=None):
         msg = compose_email(Subject=Subject,
@@ -138,7 +140,7 @@ class file_output_channel(AbstractContextManager,OutputChannel):
         return self
     
     def __exit__(self,*exc_details):
-        pass
+        return False
 
     def send(self,Subject,From,To,body):
         print("Subject : %s\nFrom : %s\nTo : %s" % (Subject,From,To),file=self.fout)
@@ -158,7 +160,7 @@ class mailbox_output_channel(AbstractContextManager,OutputChannel):
     
     def __exit__(self,*exc_details):
         self.mailbox.unlock()
-        return self
+        return False
 
     def send(self,Subject,From,To,body,inReplyTo=None):
         msg = compose_email(Subject=Subject,
@@ -185,7 +187,7 @@ class mailbox_input_channel(AbstractContextManager,OutputChannel):
     def __exit__(self,*exc_details):
         self.mailbox.flush()
         self.mailbox.unlock()
-        return self
+        return False
 
     def __iter__(self):
         for k,msg in self.mailbox.iteritems():
@@ -205,7 +207,7 @@ class pipe_io_channel(AbstractContextManager,OutputChannel,InputChannel):
         return self
     
     def __exit__(self,*exc_details):
-        return self
+        return False
 
     def send(self,Subject,From,To,body,inReplyTo=None):
         msg = compose_email(Subject=Subject,
