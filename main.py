@@ -4,16 +4,50 @@
 
 from emailhw import *
 
-from messaggi import *
-from conf import registration_cmd,submission_cmd,status_cmd
+
+from iscrizione    import comando  as iscrizione_cmd
+from iscrizione    import gestione_comando as  gestione_iscrizione
+
+from situazione    import comando  as situazione_cmd
+from situazione    import gestione_comando as  gestione_situazione
+
+from consegna      import comando  as consegna_cmd
+
 from conf import Config
+from shutil import rmtree
 
 
 input_mailbox = "./test.inbox"
-input_mailbox = "./test.outbox"
+
+
+nocommand="""
+Caro studente
+
+il suo messaggio, ricevuto dall'indirizzo
+
+{sender}
+
+non è stato riconosciuto essere un comando valido. Forse hai inserito
+più di un comando. Controlla che il messaggio sia stato formattato
+correttamente secondo quando descritto nella pagina del corso
+
+http://www.massimolauria.net/courses/infosefa2017/homework.html
+
+In bocca al lupo per il corso!
+-- 
+Massimo Lauria
+http://www.massimolauria.net
+
+Università degli studi di Roma - La Sapienza
+Dipartimento di Scienze Statistiche
+Piazzale Aldo Moro, 5
+00185 Roma, Italy
+""" 
+
+
 
 def populate():
-    with mailbox_output_channel("./test.inbox") as mbox:
+    with mailbox_output_channel(input_mailbox) as mbox:
         mbox.send(
             Subject="Per favore vorrei iscrivermi",
             From="topolino@topolinia.it",
@@ -40,7 +74,7 @@ def populate():
             Quack! Iscrivetemi al sistema.
 
             iscrizione
-            nome: Donal
+            nome: Donald
             cognome: Duck
             matricola: 12345
             """
@@ -68,8 +102,8 @@ def populate():
             body="""
             
             iscrizione
-            nome: Donal
-            cognome: Duck
+            nome: Paperoga
+            cognome: ...Duck?
             matricola: 12345
 
             consegna
@@ -79,20 +113,45 @@ def populate():
             """
         )
 
+        mbox.send(
+            Subject="Niente!",
+            From="paperoga@paperopoli.it",
+            To="massimo.lauria@uniroma1.it",
+            body="""
+            
+            iscrizione
+            nome: Paperoga
+            cognome: ...Duck?
+            """
+        )
 
+        mbox.send(
+            Subject="Per favore vorrei iscrivermi",
+            From="topolino@topolinia.it",
+            To="massimo.lauria@uniroma1.it",
+            body="""
+            
+            situazione
+
+            matricola: 12345
+            Grazie mille,
+            """
+        )
+
+        
 def main():
     """Main logic of the program
     """
     
     # Load messages from the input source
-    with mailbox_input_channel("./test.inbox") as inbox, \
+    with mailbox_input_channel(input_mailbox) as inbox, \
          file_output_channel() as outbox:        
 
 
         def _reply(orig,reply_text):
             outbox.send(
-                Subject = 'Re: {}'.format(orig['Subject']),
-                From = Config['sender'],
+                Subject = "Re: {}".format(orig['Subject']),
+                From = Config['email'],
                 To = orig['From'],
                 body = reply_text,
                 inReplyTo = orig
@@ -102,46 +161,42 @@ def main():
             
         for msg in inbox:
 
-            print("Processing message: {}",msg['Message-ID'])
-            print("Subject: {}",msg['Subject'])
-            print("From: {}",msg['From'])
-            print("To: {}",msg['To'])
+            print("/---------------------------------------\\")
+            print("Processing message: {}".format(msg['Message-ID']))
+            print("Subject: {}".format(msg['Subject']))
+            print("From: {}".format(msg['From']))
+            print("To: {}".format(msg['To']))
+            print("|---------------------------------------|")
             
             # Understand command
             found_command = [
                 cmd 
-                for cmd in [registration_cmd,submission_cmd,status_cmd]
+                for cmd in [consegna_cmd,iscrizione_cmd,situazione_cmd]
                 if cmd.detect(msg['__body__'])
             ]
 
             if len(found_command)!=1:
                 # Report error
-                _reply(msg,messaggi['quale comando?'].format(
-                    registration_email=msg['From']))
-                continue
+                outbox.reply(msg,Config['email'],nocommand.format(sender=msg['From']))
 
-            # Registration 
-            if found_command[0] == registration_cmd:
+            # Iscrizione 
+            elif found_command[0] == iscrizione_cmd:
 
-                data = registration_cmd.parse(msg['__body__'])
+                gestione_iscrizione(None,inbox,outbox,msg)
+            
+            elif found_command[0] == consegna_cmd:
+                print('Consegna')
+                
+            elif found_command[0] == situazione_cmd:
 
-                if data is None:
-                    # Registration error
-                    _reply(msg,messaggi['registrazione ERRORE'].format(
-                        registration_email=msg['From'],
-                        registration_error='\n'.join(data.get_errors())))                
-                else:
-                    # Registration OK
-                    _reply(msg,messaggi['registrazione ERRORE'].format(
-                        registration_email=msg['From'],
-                        registration_nome=data['nome'],
-                        registration_cognome=data['cognome'],
-                        registration_matricola=data['matricola']
-                    ))                
+                gestione_situazione(None,inbox,outbox,msg)
+                
             else:
-                print('Incomplete')
+                raise RuntimeError('Reached a supposedly unreachable point in the code')
 
+            
 
 if __name__ == '__main__':
     populate()
     main()
+    rmtree(input_mailbox)

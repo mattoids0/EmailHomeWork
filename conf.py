@@ -21,6 +21,9 @@ def get_smtp_password():
 # Configuration file
 Config = {
 
+    'email'         : "Massimo Lauria <massimo.lauria@uniroma1.it>",
+    
+    
     # Homeworks are processed from email sent to a specific address in
     # a specific mailbox in an IMAP main server
     #
@@ -34,7 +37,6 @@ Config = {
 
     # Replies are send by mail as well
     #
-    'sender'        : "Massimo Lauria <massimo.lauria@uniroma1.it>",
     'smtp server'   : 'smtp.gmail.com',
     'smtp user'     : 'lauria.massimo@gmail.com',
     #
@@ -69,19 +71,3 @@ def mail_output_channel():
         yield smtp
     
 
-# Default commands
-registration_cmd = emailhw.compile_command("""
-iscrizione
-nome      : <NOME> 
-cognome   : <COGNOME>
-matricola : <NUMERO DI MATRICOLA>
-""")
-
-submission_cmd = emailhw.compile_command("""
-consegna
-homework : <CODICE>
-""")
-
-status_cmd = emailhw.compile_command("""
-situazione
-""")

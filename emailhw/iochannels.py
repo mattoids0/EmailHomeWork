@@ -35,6 +35,16 @@ class OutputChannel():
     def send(self,Subject,From,To,body,inReplyTo=None):
         raise RuntimeError("This is an abstract class. No implementation.")
 
+
+    def reply(self,orig,From,body):
+        self.send(
+            Subject   = orig['Subject'],
+            From      = From,
+            To        = orig['From'],
+            body      = body,
+            inReplyTo = orig)
+
+
 #    
 # Messages are loaded from the folder of an IMAP mailbox
 #
@@ -142,8 +152,12 @@ class file_output_channel(AbstractContextManager,OutputChannel):
     def __exit__(self,*exc_details):
         return False
 
-    def send(self,Subject,From,To,body):
+    def send(self,Subject,From,To,body,inReplyTo=None):
         print("Subject : %s\nFrom : %s\nTo : %s" % (Subject,From,To),file=self.fout)
+        try:
+            print("Reply-To: %s\n" % inReplyTo['Message-ID'], file=self.fout)
+        except:
+            pass
         print(body,file=self.fout)
 
 #
