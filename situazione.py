@@ -36,7 +36,7 @@ Piazzale Aldo Moro, 5
 
 
 
-def gestione_comando(DB,inbox,outbox,msg):
+def gestione_comando(msg,DB,outbox):
     """
     Gestisci i comandi di richiesta della situazione.
 

@@ -12,6 +12,7 @@ from situazione    import comando  as situazione_cmd
 from situazione    import gestione_comando as  gestione_situazione
 
 from consegna      import comando  as consegna_cmd
+from consegna      import gestione_comando as  gestione_consegna
 
 from conf import Config
 from shutil import rmtree
@@ -46,8 +47,8 @@ Piazzale Aldo Moro, 5
 
 
 
-def populate():
-    with mailbox_output_channel(input_mailbox) as mbox:
+def populate(mailbox):
+    with mailbox_output_channel(mailbox) as mbox:
         mbox.send(
             Subject="Per favore vorrei iscrivermi",
             From="topolino@topolinia.it",
@@ -126,7 +127,7 @@ def populate():
         )
 
         mbox.send(
-            Subject="Per favore vorrei iscrivermi",
+            Subject="Per favore vorrei sapere la mia valutazione",
             From="topolino@topolinia.it",
             To="massimo.lauria@uniroma1.it",
             body="""
@@ -139,64 +140,55 @@ def populate():
         )
 
         
-def main():
+def main_logic(msg,DB,outbox):
     """Main logic of the program
     """
     
-    # Load messages from the input source
-    with mailbox_input_channel(input_mailbox) as inbox, \
-         file_output_channel() as outbox:        
+        
+    print("/---------------------------------------\\")
+    print("Processing message: {}".format(msg['Message-ID']))
+    print("Subject: {}".format(msg['Subject']))
+    print("From: {}".format(msg['From']))
+    print("To: {}".format(msg['To']))
+    print("|---------------------------------------|")
+    
+    # Understand command
+    found_command = [
+        cmd 
+        for cmd in [consegna_cmd,iscrizione_cmd,situazione_cmd]
+        if cmd.detect(msg['__body__'])
+    ]
 
+    if len(found_command)!=1:
+        # Report error
+        outbox.reply(msg,Config['email'],nocommand.format(sender=msg['From']))
 
-        def _reply(orig,reply_text):
-            outbox.send(
-                Subject = "Re: {}".format(orig['Subject']),
-                From = Config['email'],
-                To = orig['From'],
-                body = reply_text,
-                inReplyTo = orig
-            )
+    elif found_command[0] == iscrizione_cmd:
 
-            
-            
-        for msg in inbox:
+        gestione_iscrizione(msg,DB,outbox)
+    
+    elif found_command[0] == consegna_cmd:
 
-            print("/---------------------------------------\\")
-            print("Processing message: {}".format(msg['Message-ID']))
-            print("Subject: {}".format(msg['Subject']))
-            print("From: {}".format(msg['From']))
-            print("To: {}".format(msg['To']))
-            print("|---------------------------------------|")
-            
-            # Understand command
-            found_command = [
-                cmd 
-                for cmd in [consegna_cmd,iscrizione_cmd,situazione_cmd]
-                if cmd.detect(msg['__body__'])
-            ]
+        gestione_consegna(msg,DB,outbox)
+        
+    elif found_command[0] == situazione_cmd:
 
-            if len(found_command)!=1:
-                # Report error
-                outbox.reply(msg,Config['email'],nocommand.format(sender=msg['From']))
-
-            # Iscrizione 
-            elif found_command[0] == iscrizione_cmd:
-
-                gestione_iscrizione(None,inbox,outbox,msg)
-            
-            elif found_command[0] == consegna_cmd:
-                print('Consegna')
-                
-            elif found_command[0] == situazione_cmd:
-
-                gestione_situazione(None,inbox,outbox,msg)
-                
-            else:
-                raise RuntimeError('Reached a supposedly unreachable point in the code')
+        gestione_situazione(msg,DB,outbox)
+        
+    else:
+        raise RuntimeError('Reached a supposedly unreachable point in the code')
 
             
 
 if __name__ == '__main__':
-    populate()
-    main()
+
+    populate(input_mailbox)
+
+    # Load messages from the input source
+    with mailbox_input_channel(input_mailbox) as inbox, \
+         file_output_channel() as outbox:        
+
+        for msg in inbox:
+            main_logic(msg,None,outbox)
+    
     rmtree(input_mailbox)
