@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
-from emailhw import compile_command
+from emailhw import compile_command,clean_address
 from corso.configurazione import ConfigurazioneCorso
 
 comando = compile_command("""
@@ -102,14 +102,14 @@ def gestione_comando(msg,DB,outbox):
         outbox.reply(msg,
                      ConfigurazioneCorso['email'],
                      messaggi['ERRORE'].format(
-                         email=msg['From'],
+                         email=clean_address(msg['From']),
                          error_list='\n'.join(comando.get_errors())))                
     else:
         # Registration OK
         outbox.reply(msg,
                      ConfigurazioneCorso['email'],
                      messaggi['OK'].format(
-                         email=msg['From'],
+                         email=clean_address(msg['From']),
                          nome=data['nome'],
                          cognome=data['cognome'],
                          matricola=data['matricola']

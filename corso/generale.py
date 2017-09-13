@@ -56,7 +56,7 @@ def gestione_generale(msg,DB,outbox):
         # Report error
         outbox.reply(msg,
                      ConfigurazioneCorso['email'],
-                     messaggi['ERRORE'].format(sender=msg['From']))
+                     messaggi['ERRORE'].format(sender=clean_address(msg['From'])))
 
     elif found_command[0] == iscrizione_cmd:
 

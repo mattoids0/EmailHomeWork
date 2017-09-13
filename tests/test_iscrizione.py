@@ -20,7 +20,7 @@ class TestIscrizione(TestGestione):
 
         text=self.getAnswerText(
             Subject="Per favore vorrei iscrivermi",
-            From="topolino@topolinia.it",
+            From="Mickey Mouse <topolino@topolinia.it>",
             To="massimo.lauria@uniroma1.it",
             body="""
             

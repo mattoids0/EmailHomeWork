@@ -8,6 +8,7 @@ import smtplib
 import imaplib
 import mailbox
 import socket
+import email.utils as emailutils
 
 from contextlib import AbstractContextManager
 from collections import deque

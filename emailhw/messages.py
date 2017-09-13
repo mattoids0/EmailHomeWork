@@ -17,6 +17,10 @@ import datetime
 class MessageParseException(ValueError):
     pass
 
+
+def clean_address(From):
+    return email.utils.parseaddr(From)[1]
+
 def my_read_header(header_string):
     """Get an header object from an header string
 
