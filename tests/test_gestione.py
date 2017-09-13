@@ -33,11 +33,23 @@ class TestGestione(unittest.TestCase):
             return outputs[0]
 
     def getAnswerText(self,Subject,From,To,body,DB,manager=None):
-
+        self.maxDiff = None
         msg = self.getAnswer(Subject,From,To,body,DB,manager)
         return msg['__body__']
 
+    def getAttachmentCount(self,Subject,From,To,body,DB,manager=None):
 
+        msg = self.getAnswer(Subject,From,To,body,DB,manager)
+
+        try:
+            count = dict()
+            for (ftype,_,_) in msg['__attachment__']:
+                count[ftype] = count.setdefault(ftype,0) + 1
+            return count
+        except KeyError:
+            return {}
+
+        
 class TestCommandDetection(TestGestione):
 
     def test_nocommand(self):
@@ -60,7 +72,7 @@ class TestCommandDetection(TestGestione):
             """,
             DB=None,manager=gestione_generale)
 
-        self.assertEqual(text,messaggi['ERROR'].format(sender="paperoga@paperopoli.it"))
+        self.assertEqual(text,messaggi['ERRORE'].format(sender="paperoga@paperopoli.it"))
         
 
 

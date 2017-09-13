@@ -17,7 +17,7 @@ from corso.consegna      import gestione_comando as  gestione_consegna
 from corso.configurazione import ConfigurazioneCorso
 
 messaggi=dict()
-messaggi['ERROR']="""
+messaggi['ERRORE']="""
 Caro studente
 
 il suo messaggio, ricevuto dall'indirizzo
@@ -56,7 +56,7 @@ def gestione_generale(msg,DB,outbox):
         # Report error
         outbox.reply(msg,
                      ConfigurazioneCorso['email'],
-                     messaggi['ERROR'].format(sender=msg['From']))
+                     messaggi['ERRORE'].format(sender=msg['From']))
 
     elif found_command[0] == iscrizione_cmd:
 

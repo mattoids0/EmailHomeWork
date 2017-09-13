@@ -54,7 +54,7 @@ class Command:
             return False
 
         if len(result) > 1:
-            self.last_errors.append("Command <%s> occurs more than once"%self.cmd_name)
+            self.last_errors.append("Il comando <%s> dovrebbe essere presente una sola volta." % self.cmd_name)
 
         return True
     
@@ -63,7 +63,7 @@ class Command:
     
         # this is to load detection error as well
         if not self.detect(msg):
-            self.last_errors.append("Command <%s> missing"%self.cmd_name)
+            self.last_errors.append("Il comando <%s> è assente."%self.cmd_name)
         
         values = dict()
         for field,regexp in zip(self.fields,self.fields_re):
@@ -71,9 +71,9 @@ class Command:
             matches=regexp.findall(msg)
             
             if len(matches)==0:
-                self.last_errors.append("Value for field <%s> missing" % field)
+                self.last_errors.append("Manca il campo <%s>." % field)
             elif len(matches)>1:
-                self.last_errors.append("Multiple occurrence of field <%s>" % field)
+                self.last_errors.append("Il campo <%s> è presente più di una volta." % field)
             elif matches[0][0] != field:
                 raise RuntimeError("Broken regexp. This should not happen")
             else:
