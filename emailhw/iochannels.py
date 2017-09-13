@@ -125,13 +125,13 @@ class smtp_output_channel(AbstractContextManager,OutputChannel):
         return False
 
     def send(self,Subject,From,To,body,inReplyTo=None):
-        msg = compose_email(Subject=Subject,
-                            From=From,
-                            To=To,
-                            body=body,
-                            inReplyTo=inReplyTo)
+        email = compose_email(Subject=Subject,
+                              From=From,
+                              To=To,
+                              body=body,
+                              inReplyTo=inReplyTo)
         try:
-            self.smtpserver.send_message(msg)
+            self.smtpserver.send_message(email)
         except socket.gaierror as e:
             print_error('smtp send',info=e)
             sys.exit(1)
@@ -177,12 +177,12 @@ class mailbox_output_channel(AbstractContextManager,OutputChannel):
         return False
 
     def send(self,Subject,From,To,body,inReplyTo=None):
-        msg = compose_email(Subject=Subject,
-                            From=From,
-                            To=To,
-                            body=body,
-                            inReplyTo=inReplyTo)
-        self.mailbox.add(msg)
+        email = compose_email(Subject=Subject,
+                              From=From,
+                              To=To,
+                              body=body,
+                              inReplyTo=inReplyTo)
+        self.mailbox.add(email)
 
 
 #
@@ -224,18 +224,24 @@ class pipe_io_channel(AbstractContextManager,OutputChannel,InputChannel):
         return False
 
     def send(self,Subject,From,To,body,inReplyTo=None):
-        msg = compose_email(Subject=Subject,
-                            From=From,
-                            To=To,
-                            body=body,
-                            inReplyTo=inReplyTo)
-        
-        self.msg_buffer.append(msg)
+        email = compose_email(Subject=Subject,
+                              From=From,
+                              To=To,
+                              body=body,
+                              inReplyTo=inReplyTo)
+
+        local_representation = dict()
+        local_representation['__body__'] = body
+
+        for headerName,headerContent in email.items():
+            local_representation[headerName]=headerContent
+            
+        self.msg_buffer.append(local_representation)
 
     def __iter__(self):
 
         try:
-            yield msg_buffer.popleft()
+            yield self.msg_buffer.popleft()
         except IndexError:
             raise StopIteration
         

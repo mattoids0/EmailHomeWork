@@ -97,24 +97,6 @@ def populate(mailbox):
         )
 
         mbox.send(
-            Subject="Tutto o niente!",
-            From="paperoga@paperopoli.it",
-            To="massimo.lauria@uniroma1.it",
-            body="""
-            
-            iscrizione
-            nome: Paperoga
-            cognome: ...Duck?
-            matricola: 12345
-
-            consegna
-            homework: njahjkdf
-
-            situazione
-            """
-        )
-
-        mbox.send(
             Subject="Niente!",
             From="paperoga@paperopoli.it",
             To="massimo.lauria@uniroma1.it",
@@ -143,15 +125,6 @@ def populate(mailbox):
 def main_logic(msg,DB,outbox):
     """Main logic of the program
     """
-    
-        
-    print("/---------------------------------------\\")
-    print("Processing message: {}".format(msg['Message-ID']))
-    print("Subject: {}".format(msg['Subject']))
-    print("From: {}".format(msg['From']))
-    print("To: {}".format(msg['To']))
-    print("|---------------------------------------|")
-    
     # Understand command
     found_command = [
         cmd 
