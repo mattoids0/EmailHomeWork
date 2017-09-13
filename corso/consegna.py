@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 
 import emailhw
-
+from corso.configurazione import ConfigurazioneCorso
 
 comando = emailhw.compile_command("""
 consegna
@@ -85,13 +85,13 @@ def gestione_comando(msg,DB,outbox):
 
     if data is None:
         outbox.reply(msg,
-                     Config['email'],
+                     ConfigurazioneCorso['email'],
                      messaggi['ERRORE'].format(
                          email=msg['From'],
                          error_list='\n'.join(comando.get_errors())))                
     else:
         outbox.reply(msg,
-                     Config['email'],
+                     ConfigurazioneCorso['email'],
                      messaggi['OK'].format(
                          email=msg['From'],
                          nome=data['nome'],

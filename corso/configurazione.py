@@ -19,7 +19,7 @@ def get_smtp_password():
 
 
 # Configuration file
-Config = {
+ConfigurazioneCorso = {
 
     'email'         : "Massimo Lauria <massimo.lauria@uniroma1.it>",
     

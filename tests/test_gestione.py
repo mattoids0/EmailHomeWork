@@ -6,7 +6,7 @@ import unittest
 
 from emailhw.iochannels import pipe_io_channel
 
-import main
+from corso.generale import gestione_generale,messaggi
 
 
 class TestGestione(unittest.TestCase):
@@ -58,9 +58,9 @@ class TestCommandDetection(TestGestione):
 
             situazione
             """,
-            DB=None,manager=main.main_logic)
+            DB=None,manager=gestione_generale)
 
-        self.assertEqual(text,main.nocommand.format(sender="paperoga@paperopoli.it"))
+        self.assertEqual(text,messaggi['ERROR'].format(sender="paperoga@paperopoli.it"))
         
 
 

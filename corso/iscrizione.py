@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 
 from emailhw import compile_command
-from conf import Config
+from corso.configurazione import ConfigurazioneCorso
 
 comando = compile_command("""
 iscrizione
@@ -100,14 +100,14 @@ def gestione_comando(msg,DB,outbox):
     if data is None:
         # Registration error
         outbox.reply(msg,
-                     Config['email'],
+                     ConfigurazioneCorso['email'],
                      messaggi['ERRORE'].format(
                          email=msg['From'],
                          error_list='\n'.join(comando.get_errors())))                
     else:
         # Registration OK
         outbox.reply(msg,
-                     Config['email'],
+                     ConfigurazioneCorso['email'],
                      messaggi['OK'].format(
                          email=msg['From'],
                          nome=data['nome'],

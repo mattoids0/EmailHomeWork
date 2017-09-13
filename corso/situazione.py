@@ -2,7 +2,8 @@
 # -*- coding:utf-8 -*-
 
 from emailhw import compile_command
-from conf import Config
+
+from corso.configurazione import ConfigurazioneCorso
 
 comando = compile_command("""
 situazione
@@ -63,5 +64,5 @@ def gestione_comando(msg,DB,outbox):
     else:
         # Registration OK
         outbox.reply(msg,
-                     Config['email'],
+                     ConfigurazioneCorso['email'],
                      messaggi['OK'])

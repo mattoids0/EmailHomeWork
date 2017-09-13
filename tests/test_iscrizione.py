@@ -6,7 +6,7 @@ import unittest
 
 from tests.test_gestione import TestGestione
 
-from iscrizione import gestione_comando
+from corso import *
 
 
 class TestIscrizione(TestGestione):
