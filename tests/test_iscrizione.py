@@ -4,6 +4,8 @@
 
 import unittest
 
+from emailhw.dbase import dbase
+
 from tests.test_gestione import TestGestione
 
 from corso import gestione_iscrizione
@@ -18,27 +20,30 @@ class TestIscrizione(TestGestione):
 
     def test_iscrizione_corretta(self):
 
-        text=self.getAnswerText(
-            Subject="Per favore vorrei iscrivermi",
-            From="Mickey Mouse <topolino@topolinia.it>",
-            To="massimo.lauria@uniroma1.it",
-            body="""
+        with dbase() as localD:
+            localD.initDB()
+        
+            text=self.getAnswerText(
+                Subject="Per favore vorrei iscrivermi",
+                From="Mickey Mouse <topolino@topolinia.it>",
+                To="massimo.lauria@uniroma1.it",
+                body="""
             
-            Ciao, vorrei effettuare la mia iscrizione al sistema.
+                Ciao, vorrei effettuare la mia iscrizione al sistema.
+                
+                iscrizione
+                nome: Mickey
+                cognome: Mouse
+                matricola: 12345
 
-            iscrizione
-            nome: Mickey
-            cognome: Mouse
-            matricola: 12345
+                Grazie mille,
+                """,
+                DB=localD,manager=gestione_iscrizione)
 
-            Grazie mille,
-            """,
-            DB=None,manager=gestione_iscrizione)
-
-        self.assertEqual(text,messaggi['OK'].format(email='topolino@topolinia.it',
-                                                    nome="Mickey",
-                                                    cognome='Mouse',
-                                                    matricola='12345'))
+            self.assertEqual(text,messaggi['OK'].format(email='topolino@topolinia.it',
+                                                        nome="Mickey",
+                                                        cognome='Mouse',
+                                                        matricola='12345'))
  
 
     def test_iscrizione_incompleta(self):
@@ -58,38 +63,47 @@ class TestIscrizione(TestGestione):
  
     def test_iscrizione_doppia(self):
 
-        text = self.getAnswerText(
-            Subject="Quack quack!",
-            From="paperino@paperopoli.it",
-            To="massimo.lauria@uniroma1.it",
-            body="""
-            
-            Quack! Iscrivetemi al sistema.
+        with dbase() as localD:
+            localD.initDB()
 
-            iscrizione
-            nome: Donald
-            cognome: Duck
-            matricola: 12345
-            """,
-            DB=None,manager=gestione_iscrizione)
-        self.assertEqual(text,messaggi['OK'].format(email="paperino@paperopoli.it",nome='Donald',cognome='Duck',matricola='12345'))
+            text = self.getAnswerText(
+                Subject="Quack quack!",
+                From="paperino@paperopoli.it",
+                To="massimo.lauria@uniroma1.it",
+                body="""
+                
+                Quack! Iscrivetemi al sistema.
+                
+                iscrizione
+                nome: Donald
+                cognome: Duck
+                matricola: 12345
+                """,
+                DB=localD,manager=gestione_iscrizione)
 
-        text = self.getAnswerText(
-            Subject="Quack quack quack e ancora quack!",
-            From="paperino@paperopoli.it",
-            To="massimo.lauria@uniroma1.it",
-            body="""
-            
-            Ancora non mi avete iscritto? Quaaaaaack!
+            self.assertEqual(text,messaggi['OK'].format(email="paperino@paperopoli.it",
+                                                        nome='Donald',
+                                                        cognome='Duck',
+                                                        matricola='12345'))
 
-            iscrizione
-            nome: Donal
-            cognome: Duck
-            matricola: 12345
-            """,
-            DB=None,manager=gestione_iscrizione)
         
-        self.assertEqual(text,messaggi['ERRORE'])
+            text = self.getAnswerText(
+                Subject="Quack quack quack e ancora quack!",
+                From="paperino@paperopoli.it",
+                To="massimo.lauria@uniroma1.it",
+                body="""
+            
+                Ancora non mi avete iscritto? Quaaaaaack!
+
+                iscrizione
+                nome: Donal
+                cognome: Duck
+                matricola: 12345
+                """,
+                DB=localD,manager=gestione_iscrizione)
+        
+            self.assertEqual(text,messaggi['DOUBLE'].format(
+                email="paperino@paperopoli.it"))
 
 if __name__ == '__main__':
     unittest.main()

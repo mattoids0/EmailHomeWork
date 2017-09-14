@@ -143,6 +143,16 @@ class TestParsing(unittest.TestCase):
         self.assertIsNone(res)
         self.assertEqual(len(self.command1.get_errors()),1)
 
+    def test_empty_field(self):
+        text = """
+        command1
+        field1 :xx xx
+        field2 :
+        """        
+        self.assertTrue(self.command1.detect(text))
+        res = self.command1.parse(text)
+        self.assertIsNone(res)
+        self.assertEqual(len(self.command1.get_errors()),1)
         
 if __name__ == '__main__':
     unittest.main()

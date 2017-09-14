@@ -6,41 +6,71 @@ import unittest
 
 from tests.test_gestione import TestGestione
 
-from corso import gestione_situazione
+from corso import gestione_situazione,gestione_iscrizione
 from corso.situazione import messaggi
+from emailhw.dbase import dbase
 
-class TestIscrizione(TestGestione):
-    """Testa la gestione delle iscrizioni"""
+class TestSituazione(TestGestione):
+    """Testa la richiesta della situazione"""
 
 
     def test_situazione(self):
 
-        text=self.getAnswerText(
-            Subject="Per favore vorrei sapere la mia valutazione",
-            From="topolino@topolinia.it",
-            To="massimo.lauria@uniroma1.it",
-            body="""
+        with dbase() as localD:
+            localD.initDB()
+
+            text=self.getAnswerText(
+                Subject="Per favore vorrei sapere la mia valutazione",
+                From="topolino@topolinia.it",
+                To="massimo.lauria@uniroma1.it",
+                body="""
             
-            situazione
+                situazione
 
-            matricola: 12345
-            Grazie mille,
-            """,
-            DB=None,manager=gestione_situazione)
+                matricola: 12345
+                Grazie mille,
+                """,
+                DB=localD,manager=gestione_situazione)
 
-        self.assertEqual(text,messaggi['OK'].format(nome="Mickey",cognome='Mouse'))
+            self.assertEqual(text,messaggi['ERRORE'].format(
+                email="topolino@topolinia.it"))
+
+
+            localD.newStudent(ID='12345',
+                              name='Mickey',
+                              surname='Mouse',
+                              email='topolino@topolinia.it')
+
+            text=self.getAnswerText(
+                Subject="Per favore vorrei sapere la mia valutazione",
+                From="topolino@topolinia.it",
+                To="massimo.lauria@uniroma1.it",
+                body="""
+            
+                situazione
+
+                matricola: 12345
+                Grazie mille,
+                """,
+                DB=localD,manager=gestione_situazione)
+
+            self.assertEqual(text,messaggi['OK'].format(nome="Mickey",
+                                                        cognome='Mouse',
+                                                        matricola='12345'))
  
-        text=self.getAnswerText(
-            Subject="Per favore vorrei sapere la mia valutazione",
-            From="topolino@topolinia.it",
-            To="massimo.lauria@uniroma1.it",
-            body="""
-            
-            situazione
-            """,
-            DB=None,manager=gestione_situazione)
+            text=self.getAnswerText(
+                Subject="Per favore vorrei sapere la mia valutazione",
+                From="topolino@topolinia.it",
+                To="massimo.lauria@uniroma1.it",
+                body="""
+                
+                situazione
+                """,
+                DB=localD,manager=gestione_situazione)
 
-        self.assertEqual(text,messaggi['OK'].format(nome="Mickey",cognome='Mouse'))
+            self.assertEqual(text,messaggi['OK'].format(nome="Mickey",
+                                                        cognome='Mouse',
+                                                        matricola='12345'))
  
 
 if __name__ == '__main__':

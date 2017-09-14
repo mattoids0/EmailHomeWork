@@ -24,7 +24,7 @@ Homework entity:
 
 Incoming Messages entity:
 
-   message(messageID,mailboxID,From,Date,commentary)
+   message(Key,messageID,From,Date,commentary)
 
    This is to log incoming email messages. Both messageID and
    mailboxID should be unique, but they actually depend on the
@@ -33,7 +33,7 @@ Incoming Messages entity:
 
 Sumbission relation:
 
-   submit(studentID,homeworkID,messageID,mailboxID,evaluation,filenames)
+   submit(student.RowID,homework.rowID,message.rowID,evaluation,filenames)
 
    each submission is logged. 'evaluation' can be N/A or a number, in
    order to represent submitted homeworks that haven't been
@@ -56,8 +56,8 @@ class dbase(AbstractContextManager):
         self.connection = None
 
     def __enter__(self):
-        self.connection = sqlite3.connect(filename)
-
+        self.connection = sqlite3.connect(self.filename)
+        return self
     
     def __exit__(self,*exc_details):
         self.connection.close()
@@ -67,15 +67,55 @@ class dbase(AbstractContextManager):
 
     def initDB(self):
         """Create all the tables of database"""
-        pass
+        self.connection.execute("""
+        CREATE TABLE IF NOT EXISTS
+        student( 
+        ID         text PRIMARY KEY NOT NULL,
+        name       text NOT NULL,
+        surname    text NOT NULL,
+        email      text UNIQUE NOT NULL
+        )""")
 
-    def newStudent(self,studentID,name,surname,email):
-        pass
+        self.connection.execute("""
+        CREATE TABLE IF NOT EXISTS
+        homework( 
+        ID                    text PRIMARY KEY  NOT NULL,
+        title                 text NOT NULL,
+        creation              integer NOT NULL,
+        deadline              integer NOT NULL,
+        required_attachments  text,
+        CHECK (creation < deadline)
+        )""")
+
+        self.connection.execute("""
+        CREATE TABLE IF NOT EXISTS
+        homework( 
+        MessageID             text UNIQUE NOT NULL,
+        sender                text NOT NULL,
+        date                  integer NOT NULL,
+        commentary            text DEFAULT NULL
+        )""")
+        
+        self.connection.execute("""
+        CREATE TABLE IF NOT EXISTS
+        submit( 
+        student    references student(rowid)  ON UPDATE CASCADE,
+        homework   references homework(rowid) ON UPDATE CASCADE,
+        message    references message(rowid)  ON UPDATE CASCADE,
+        evaluation text DEFAULT NULL,
+        filenames  text DEFAULT NULL
+        )""")
+
+    def newStudent(self,ID,name,surname,email):
+
+        with self.connection as con:
+            self.connection.execute('insert into student values(?,?,?,?)',
+            (ID,name,surname,email))
 
     def logIncomingMessage(self,messageID,UID,Date,From,commentary):
         pass
 
-    def newHomework(self,homeworkID,title,deadline,required_attachments=[]):
+    def newHomework(self,ID,title,deadline,required_attachments=[]):
         pass
 
     def allHomeworks(self):
@@ -84,8 +124,32 @@ class dbase(AbstractContextManager):
     def newSubmission(self,homeworkID,studentID,messageID,mailboxID,filenames):
         pass
 
-    def findStudentByEmail(self,email):
-        pass
+    def findStudentByEmail(self,emailAddress):
+        with self.connection:
+            con=self.connection.cursor()
+            con.execute('select ID,name,surname,email from student where email=?',
+                        (emailAddress,))
+            students = con.fetchall()
+            assert len(students) <= 1
+            if len(students)==0:
+                return None
+            else:
+                return {'ID'     : students[0][0],
+                        'name'   :students[0][1],
+                        'surname':students[0][2],
+                        'email'  :students[0][3] }
 
-    def findStudentResults(self,studentID):
-        pass
+    def findStudentByID(self,studentID):
+        with self.connection:
+            con=self.connection.cursor()
+            con.execute('select ID,name,surname,email from student where ID=?',
+                        (studentID,))
+            students = con.fetchall()
+            assert len(students) <= 1
+            if len(students)==0:
+                return None
+            else:
+                return {'ID'     :students[0][0],
+                        'name'   :students[0][1],
+                        'surname':students[0][2],
+                        'email'  :students[0][3] }

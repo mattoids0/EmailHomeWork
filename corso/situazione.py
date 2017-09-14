@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
-from emailhw import compile_command
+from emailhw import compile_command,clean_address
 
 from corso.configurazione import ConfigurazioneCorso
 
@@ -35,6 +35,26 @@ Piazzale Aldo Moro, 5
 00185 Roma, Italy
 """
 
+messaggi['ERRORE']="""
+Caro studente,
+
+il tentativo di registrazione ricevuto dall'indirizzo
+
+{email}
+
+è fallito. Il tuo indirizzo email non corrisponde a nessuno studente.
+Sei sicuro di esserti iscritto al sistema?
+
+In bocca al lupo per il corso!
+-- 
+Massimo Lauria
+http://www.massimolauria.net
+
+Università degli studi di Roma - La Sapienza
+Dipartimento di Scienze Statistiche
+Piazzale Aldo Moro, 5
+00185 Roma, Italy
+"""
 
 
 def gestione_comando(msg,DB,outbox):
@@ -61,8 +81,16 @@ def gestione_comando(msg,DB,outbox):
     if data is None:
         raise RuntimeError('Reached a supposedly unreachable point in the code')
 
-    else:
-        # Registration OK
+    sender = clean_address(msg['From'])
+    student = DB.findStudentByEmail(sender)
+
+    if student is None:
         outbox.reply(msg,
                      ConfigurazioneCorso['email'],
-                     messaggi['OK'])
+                     messaggi['ERRORE'].format(email=sender))
+    else:
+        outbox.reply(msg,
+                     ConfigurazioneCorso['email'],
+                     messaggi['OK'].format(nome=student['name'],
+                                           cognome=student['surname'],
+                                           matricola=student['ID']))

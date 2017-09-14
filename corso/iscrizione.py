@@ -75,6 +75,27 @@ Piazzale Aldo Moro, 5
 00185 Roma, Italy
 """
 
+messaggi['DOUBLE']="""
+Caro studente,
+
+il tentativo di registrazione ricevuto dall'indirizzo
+
+{email}
+
+è fallito. Esite già uno studente iscritto con questo indirizzo.
+Se questo studente non sei tu, e questo è il tuo indirizzo di posta
+elettronica ti prego di contattarmi immediatamente.
+
+In bocca al lupo per il corso!
+-- 
+Massimo Lauria
+http://www.massimolauria.net
+
+Università degli studi di Roma - La Sapienza
+Dipartimento di Scienze Statistiche
+Piazzale Aldo Moro, 5
+00185 Roma, Italy
+"""
 
 def gestione_comando(msg,DB,outbox):
     """
@@ -97,20 +118,43 @@ def gestione_comando(msg,DB,outbox):
     
     data = comando.parse(msg['__body__'])
 
+    # Test that matricola is well formatted
+
+    
+    # Message is not well formatted
     if data is None:
-        # Registration error
         outbox.reply(msg,
                      ConfigurazioneCorso['email'],
                      messaggi['ERRORE'].format(
                          email=clean_address(msg['From']),
-                         error_list='\n'.join(comando.get_errors())))                
-    else:
-        # Registration OK
+                         error_list='\n'.join(comando.get_errors())))
+        return
+
+
+    
+    # Student already registered
+    entry = DB.findStudentByEmail(clean_address(msg['From']))
+    if entry is not None:
         outbox.reply(msg,
                      ConfigurazioneCorso['email'],
+                     messaggi['DOUBLE'].format(
+                         email=clean_address(msg['From'])))
+        return
+
+    
+    # Registration OK
+    DB.newStudent(ID=data['matricola'],
+                  name=data['nome'],
+                  surname=data['cognome'],
+                  email=clean_address(msg['From']))
+    # query as a double check
+    entry = DB.findStudentByID(data['matricola'])
+    
+    outbox.reply(msg,
+                     ConfigurazioneCorso['email'],
                      messaggi['OK'].format(
-                         email=clean_address(msg['From']),
-                         nome=data['nome'],
-                         cognome=data['cognome'],
-                         matricola=data['matricola']
+                         email=entry['email'],
+                         nome=entry['name'],
+                         cognome=entry['surname'],
+                         matricola=entry['ID']
         ))
