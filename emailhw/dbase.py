@@ -20,15 +20,15 @@ Homework entity:
    homework(ID,title,creation,deadline,required_attachments)
 
    ID must be unique, creation < deadline, and required_attachments
-   must be something like Python,Sql,pdf.
+   must be something like python,sql,pdf.
 
 Incoming Messages entity:
 
-   message(Key,messageID,From,Date,commentary)
+   message(messageID,UID,sender,date,commentary)
 
-   This is to log incoming email messages. Both messageID and
-   mailboxID should be unique, but they actually depend on the
-   implementation. commentary describes which action has been taken
+   This is to log incoming email messages. The messageID field and UID
+   should be both unique, but they actually depend on the
+   implementation. Commentary describes which action has been taken
    when seeing this email
 
 Sumbission relation:
@@ -89,8 +89,9 @@ class dbase(AbstractContextManager):
 
         self.connection.execute("""
         CREATE TABLE IF NOT EXISTS
-        homework( 
-        MessageID             text UNIQUE NOT NULL,
+        message( 
+        messageID             text UNIQUE NOT NULL,
+        UID                   integer UNIQUE NOT NULL,
         sender                text NOT NULL,
         date                  integer NOT NULL,
         commentary            text DEFAULT NULL
@@ -121,7 +122,7 @@ class dbase(AbstractContextManager):
     def allHomeworks(self):
         pass
 
-    def newSubmission(self,homeworkID,studentID,messageID,mailboxID,filenames):
+    def newSubmission(self,homeworkID,studentID,messageID,filenames):
         pass
 
     def findStudentByEmail(self,emailAddress):

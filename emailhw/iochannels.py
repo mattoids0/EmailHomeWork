@@ -154,7 +154,8 @@ class file_output_channel(AbstractContextManager,OutputChannel):
         return False
 
     def send(self,Subject,From,To,body,inReplyTo=None):
-        print("Subject : %s\nFrom : %s\nTo : %s" % (Subject,From,To),file=self.fout)
+        print("Subject : %s\nFrom : %s\nTo : %s" % (Subject,From,To),
+              file=self.fout)
         try:
             print("Reply-To: %s\n" % inReplyTo['Message-ID'], file=self.fout)
         except:
