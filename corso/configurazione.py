@@ -21,15 +21,15 @@ def get_smtp_password():
 # Configuration file
 ConfigurazioneCorso = {
 
-    'email'         : "Massimo Lauria <massimo.lauria@uniroma1.it>",
+    'email'         : "Matt Oids <matt_oids@securepost.one>",
     
     
     # Homeworks are processed from email sent to a specific address in
     # a specific mailbox in an IMAP main server
     #
-    'imap server'   : 'imap.gmail.com',
-    'imap user'     : 'lauria.massimo@gmail.com',
-    'imap mailbox'  : "progetti/INFOSEFA2017",
+    'imap server'   : 'mail.securepost.one',
+    'imap user'     : 'matt_oids@securepost.one',
+    'imap mailbox'  : "AWKw@rkf0x1996",
     #
     # The password may be a string or a function that return a string
     #
@@ -37,8 +37,8 @@ ConfigurazioneCorso = {
 
     # Replies are send by mail as well
     #
-    'smtp server'   : 'smtp.gmail.com',
-    'smtp user'     : 'lauria.massimo@gmail.com',
+    'smtp server'   : 'mail.securepost.one',
+    'smtp user'     : 'matt_oids@securepost.one',
     #
     # The password may be a string or a function that return a string
     #
@@ -46,8 +46,8 @@ ConfigurazioneCorso = {
 
     # Data storage
     #
-    'storage path'  : "./infosefa2017-files/",
-    'storage db'    : "./infosefa2017.db"   
+    'storage path'  : "./infosefa2019-files/",
+    'storage db'    : "./infosefa2019.db"   
 }
 
 
